@@ -160,5 +160,3 @@ The output from the example sketch looks like this for the data structs (advance
       Relative humidity: 89%
       Weather code: 51
     All requests completed
-
-
