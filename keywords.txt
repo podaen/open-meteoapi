@@ -1,0 +1,41 @@
+open_meteoapi	KEYWORD1
+OpenMeteoDailyData	KEYWORD1
+OpenMeteoHourlyData	KEYWORD1
+OpenMeteoCurrentData	KEYWORD1
+
+begin	KEYWORD2
+setCACert	KEYWORD2
+setTemperatureUnit	KEYWORD2
+setWindSpeedUnit	KEYWORD2
+setPrecipitationUnit	KEYWORD2
+setForecastDays	KEYWORD2
+setTimeout	KEYWORD2
+getDaily	KEYWORD2
+getHourly	KEYWORD2
+getCurrent	KEYWORD2
+lastError	KEYWORD2
+lastErrorMessage	KEYWORD2
+
+OPEN_METEO_MAX_DAILY	LITERAL1
+OPEN_METEO_MAX_HOURLY	LITERAL1
+
+date	LITERAL1
+time	LITERAL1
+temperatureMin	LITERAL1
+temperatureMax	LITERAL1
+apparentTemperatureMin	LITERAL1
+apparentTemperatureMax	LITERAL1
+temperature	LITERAL1
+sunrise	LITERAL1
+sunset	LITERAL1
+moonrise	LITERAL1
+moonPhase	LITERAL1
+rain	LITERAL1
+rainSum	LITERAL1
+snowfall	LITERAL1
+snowfallSum	LITERAL1
+windGustsMax	LITERAL1
+windSpeedMax	LITERAL1
+windDirectionDominant	LITERAL1
+relativeHumidity	LITERAL1
+weatherCode	LITERAL1
