@@ -82,46 +82,73 @@ Both snippets assume this printer function is already defined:
 
 The output from the example sketch looks like this for the data structs (advanced example):
 
-    Port closed
-    Uploading to I/O board
     Opening port
     Port open
-    VMDPR_login to WiFi
-    Begin Provisioning using Soft AP
-    ..............
+    ...........
     Connected IP address : 192.168.0.200
     .
     Wi-Fi connected
-    Waiting for clock.
-    Unix time: 1792758192
+    Waiting for clock........
+    Unix time: 1792765296
     Starting daily request...
-    Daily request returned after 3335 ms
+    Daily request returned after 3321 ms
 
     Daily 2026-10-23
-      Temperature min/max: 7.4 / 12.3 C
-      Apparent min/max: 1.8 / 9.7 C
+      Temperature min/max: 7.2 / 12.4 C
+      Apparent min/max: 1.3 / 9.7 C
       Sunrise/sunset: 2026-10-23T08:20 / 2026-10-23T18:35
-      Rain/snow: 19.0 / 0.0 mm
-      Max wind speed/gust: 50.8 / 98.3 km/h
+      Rain/snow: 22.5 / 0.0 mm
+      Max wind speed/gust: 50.4 / 93.2 km/h
       Dominant wind direction: 196 degrees
       Moon phase/rise: 0.40 / 2026-10-23T17:17
       Weather code: 63
     Starting hourly request...
-    Hourly request returned after 3325 ms
+    Hourly request returned after 3288 ms
 
-    Hourly 2026-10-23T14:00
-      Temperature: 11.1 C
-      Rain/snow: 0.9 / 0.0 mm
-      Relative humidity: 89%
-      Weather code: 53
+    Hourly 2026-10-23T16:00
+      Temperature: 11.4 C
+      Rain/snow: 3.9 / 0.0 mm
+      Relative humidity: 93%
+      Weather code: 63
+
+    Hourly 2026-10-23T17:00
+      Temperature: 12.4 C
+      Rain/snow: 2.4 / 0.0 mm
+      Relative humidity: 92%
+      Weather code: 61
+
+    Hourly 2026-10-23T18:00
+      Temperature: 11.9 C
+      Rain/snow: 2.2 / 0.0 mm
+      Relative humidity: 90%
+      Weather code: 61
+
+    Hourly 2026-10-23T19:00
+      Temperature: 10.7 C
+      Rain/snow: 1.3 / 0.0 mm
+      Relative humidity: 91%
+      Weather code: 61
+
+    Hourly 2026-10-23T20:00
+      Temperature: 8.8 C
+      Rain/snow: 0.3 / 0.0 mm
+      Relative humidity: 90%
+      Weather code: 51
     Starting current request...
-    Current request returned after 3324 ms
+    Current request returned after 3286 ms
 
-Current conditions at 2026-10-23T14:15
-  Temperature: 11.2 C
-  Rain/snow: 0.1 / 0.0 mm
-  Relative humidity: 89%
-  Weather code: 51
-All requests completed
+    Current conditions at 2026-10-23T16:15
+      Temperature: 11.6 C
+      Rain/snow: 0.6 / 0.0 mm
+      Relative humidity: 93%
+      Weather code: 61
+    All requests completed
+
+    Current conditions at 2026-10-23T14:15
+      Temperature: 11.2 C
+      Rain/snow: 0.1 / 0.0 mm
+      Relative humidity: 89%
+      Weather code: 51
+    All requests completed
 
 
