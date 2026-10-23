@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/open-meteoapi.vcxitems
+/open-meteoapi.vcxitems.filters
+/open-meteoapi.vcxitems.user
+/open-meteoapi.sln
