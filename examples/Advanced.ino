@@ -109,17 +109,17 @@ void setup() {
     weather.setCACert(rootCA);
     weather.setTimeout(30000);
 
-    // One struct for each request; no caller-side data arrays are needed.
-    OpenMeteoDailyData daily;
-    OpenMeteoHourlyData hourly;
-    OpenMeteoCurrentData current;
+    // Daily and current use one-element arrays; hourly requests five hours.
+    OpenMeteoDailyData daily[1];
+    OpenMeteoHourlyData hourly[5];
+    OpenMeteoCurrentData current[1];
 
     Serial.println("Starting daily request...");
     unsigned long started = millis();
-    int result = weather.getDaily(&daily, 1);
+    int result = weather.getDaily(daily, 1);
     Serial.printf("Daily request returned after %lu ms\n", millis() - started);
     if (result == 0) {
-        printDaily(daily);
+        printDaily(daily[0]);
     }
     else {
         Serial.printf("Daily request failed (%d): %s\n",
@@ -128,10 +128,12 @@ void setup() {
 
     Serial.println("Starting hourly request...");
     started = millis();
-    result = weather.getHourly(&hourly, 1);
+    result = weather.getHourly(hourly, 5);
     Serial.printf("Hourly request returned after %lu ms\n", millis() - started);
     if (result == 0) {
-        printHourly(hourly);
+        for (uint8_t i = 0; i < 5; ++i) {
+            printHourly(hourly[i]);
+        }
     }
     else {
         Serial.printf("Hourly request failed (%d): %s\n",
@@ -140,10 +142,10 @@ void setup() {
 
     Serial.println("Starting current request...");
     started = millis();
-    result = weather.getCurrent(&current);
+    result = weather.getCurrent(&current[0]);
     Serial.printf("Current request returned after %lu ms\n", millis() - started);
     if (result == 0) {
-        printCurrent(current);
+        printCurrent(current[0]);
     }
     else {
         Serial.printf("Current request failed (%d): %s\n",
