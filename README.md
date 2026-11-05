@@ -48,48 +48,6 @@ Open the [Open-Meteo Weather Forecast API docs](https://open-meteo.com/en/docs).
 
 The API docs list the available hourly and daily variables. To find meanings for `weather_code`, scroll down to **Weather variable documentation → WMO Weather interpretation codes (WW)**. The API returns a number; the table maps it to a description such as `0 = Clear sky`, `3 = Overcast`, `61 = Slight rain`, or `95 = Thunderstorm`. For the complete and current table, use the [WMO weather-code table in the API docs](https://open-meteo.com/en/docs).
 
-## Two ways to receive daily data
-
-The library lets your sketch receive results in either an array of data structs or one data struct. The array example requests two days and prints only the first; the single-struct example requests one day. Use the array form when you want to collect multiple records, for example before sending them with ESP-NOW.
-
-### Array of structs
-
-    OpenMeteoDailyData dataD[2];
-
-    int result = weather.getDaily(dataD, 2);
-    if (result == 0) {
-      printDaily(dataD[0]);  // Print only the first day
-    } else {
-      Serial.printf("Daily request failed (%d): %s\n",
-                    result, weather.lastErrorMessage());
-    }
-
-To send records using ESP-NOW, pass the selected struct (for example, `dataD[0]`) to your ESP-NOW send routine. Check the struct size against the ESP-NOW payload limit and use matching data definitions on both devices.
-
-### One struct
-
-    OpenMeteoDailyData daily;
-
-    int result = weather.getDaily(&daily, 1);
-    if (result == 0) {
-      printDaily(daily);
-    } else {
-      Serial.printf("Daily request failed (%d): %s\n",
-                    result, weather.lastErrorMessage());
-    }
-
-Both snippets assume this printer function is already defined:
-
-    void printDaily(const OpenMeteoDailyData& d) {
-      Serial.printf("\nDaily %s\n", d.date);
-      Serial.printf("  Temperature min/max: %.1f / %.1f C\n",
-                    d.temperatureMin, d.temperatureMax);
-      Serial.printf("  Rain/snow: %.1f / %.1f mm\n", d.rainSum, d.snowfallSum);
-      Serial.printf("  Weather code: %d\n", d.weatherCode);
-    }
-
-
-
 The output from the example sketch looks like this for the data structs (advanced example):
 
     Opening port
