@@ -164,20 +164,22 @@ private:
 open_meteoapi::open_meteoapi()
     : _client(nullptr),
     _caCert(nullptr),
-    _latitude(0),
-    _longitude(0),
+    _latitude(0.0f),
+    _longitude(0.0f),
     _forecastDays(1),
-    _timeout(15000),
+    _timeout(30000),
+    _lastRequest(0),
     _lastError(0) {
+    _lastRequestSection[0] = '\0';
     _transportError[0] = '\0';
+
     strlcpy(_timezone, "auto", sizeof(_timezone));
     strlcpy(_temperatureUnit, "celsius", sizeof(_temperatureUnit));
     strlcpy(_windSpeedUnit, "kmh", sizeof(_windSpeedUnit));
     strlcpy(_precipitationUnit, "mm", sizeof(_precipitationUnit));
 }
 
-void open_meteoapi::begin(WiFiClientSecure& client, float latitude, float longitude,
-    const char* timezone) {
+void open_meteoapi::begin(WiFiClientSecure& client, float latitude, float longitude,const char* timezone) {
     _client = &client;
     _latitude = latitude;
     _longitude = longitude;
@@ -230,8 +232,7 @@ String open_meteoapi::encode(const char* value) {
     return result;
 }
 
-String open_meteoapi::makeUrl(const char* section, const char* variables,
-    uint8_t count) {
+String open_meteoapi::makeUrl(const char* section, const char* variables, uint8_t count) {
     String url = "https://api.open-meteo.com/v1/forecast?latitude=";
     url += String(_latitude, 4);
     url += "&longitude=";
@@ -258,24 +259,51 @@ String open_meteoapi::makeUrl(const char* section, const char* variables,
     return url;
 }
 
-int open_meteoapi::request(const char* section, const char* variables,
-    uint8_t count, OpenMeteoJsonListener& listener) {
-    if (!_client) return _lastError = ERR_NOT_INITIALIZED;
+int open_meteoapi::request(const char* section,const char* variables,uint8_t count,OpenMeteoJsonListener& listener) {
+    if (!_client) {
+        return _lastError = ERR_NOT_INITIALIZED;
+    }
+
+    const uint32_t now = millis();
+
+    if (_lastRequest != 0 &&
+        _lastError == 0 &&
+        interval != 0 &&
+        strcmp(_lastRequestSection, section) == 0 &&
+        static_cast<uint32_t>(now - _lastRequest) < interval) {
+        return 0;
+    }
+
     _transportError[0] = '\0';
+
     HTTPClient http;
     http.setTimeout(_timeout);
+
     const String url = makeUrl(section, variables, count);
+
     if (!http.begin(*_client, url)) {
-        strlcpy(_transportError, "HTTPClient rejected the URL/client", sizeof(_transportError));
+        strlcpy(
+            _transportError,
+            "HTTPClient rejected the URL/client",
+            sizeof(_transportError));
+
         return _lastError = ERR_TRANSPORT;
     }
+
     const int status = http.GET();
+
     if (status <= 0) {
-        String detail = HTTPClient::errorToString(status);
-        strlcpy(_transportError, detail.c_str(), sizeof(_transportError));
+        const String detail = HTTPClient::errorToString(status);
+
+        strlcpy(
+            _transportError,
+            detail.c_str(),
+            sizeof(_transportError));
+
         http.end();
         return _lastError = ERR_TRANSPORT;
     }
+
     if (status != HTTP_CODE_OK) {
         http.end();
         return _lastError = status;
@@ -283,18 +311,39 @@ int open_meteoapi::request(const char* section, const char* variables,
 
     JsonStreamingParser parser;
     parser.setListener(&listener);
+
     Stream& stream = http.getStream();
     const uint32_t started = millis();
-    while (!listener.complete() && millis() - started < _timeout) {
+
+    while (!listener.complete() &&
+        millis() - started < _timeout) {
         while (stream.available() && !listener.complete()) {
             parser.parse(static_cast<char>(stream.read()));
         }
-        if (!listener.complete() && _client->connected()) delay(1);
-        else if (!stream.available()) break;
+
+        if (!listener.complete() && _client->connected()) {
+            delay(1);
+        }
+        else if (!stream.available()) {
+            break;
+        }
     }
+
     http.end();
-    if (!listener.complete()) return _lastError = ERR_JSON;
-    if (!listener.hasExpectedData()) return _lastError = ERR_MISSING_DATA;
+
+    if (!listener.complete()) {
+        return _lastError = ERR_JSON;
+    }
+
+    if (!listener.hasExpectedData()) {
+        return _lastError = ERR_MISSING_DATA;
+    }
+
+    _lastRequest = millis();
+    strlcpy(
+        _lastRequestSection,
+        section,
+        sizeof(_lastRequestSection));
     _lastError = 0;
     return 0;
 }
@@ -319,5 +368,8 @@ int open_meteoapi::getCurrent(OpenMeteoCurrentData* out) {
     OpenMeteoJsonListener listener(KIND_CURRENT, out, 1);
     return request("current", CURRENT_FIELDS, 1, listener);
 }
+
+
+
 
 

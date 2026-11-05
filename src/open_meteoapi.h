@@ -122,47 +122,60 @@ struct OpenMeteoCurrentData {
 
 class open_meteoapi {
 public:
-	open_meteoapi();
+    open_meteoapi();
 
-	// The caller owns the secure client and its TLS certificate data.
-	void begin(WiFiClientSecure& client, float latitude, float longitude,
-		const char* timezone = "auto");
-	void setCACert(const char* rootCA);
+    uint32_t interval = 0;
 
-	void setTemperatureUnit(const char* unit);  // "celsius" or "fahrenheit"
-	void setWindSpeedUnit(const char* unit);    // "kmh", "ms", "mph", or "kn"
-	void setPrecipitationUnit(const char* unit);// "mm" or "inch"
-	void setForecastDays(uint8_t days);         // 1..16
+    void begin(
+        WiFiClientSecure& client,
+        float latitude,
+        float longitude,
+        const char* timezone = "auto");
 
-	// Synchronous requests. Returns 0 on success, a negative library error,
-	// or the HTTP status code returned by Open-Meteo.
-	int getDaily(OpenMeteoDailyData* out, uint8_t count);
-	int getHourly(OpenMeteoHourlyData* out, uint8_t count);
-	int getCurrent(OpenMeteoCurrentData* out);
+    void setCACert(const char* rootCA);
+    void setTemperatureUnit(const char* unit);
+    void setWindSpeedUnit(const char* unit);
+    void setPrecipitationUnit(const char* unit);
+    void setForecastDays(uint8_t days);
 
-	void setTimeout(uint16_t milliseconds);
-	int lastError() const { return _lastError; }
-	const char* lastErrorMessage() const;
+    int getDaily(OpenMeteoDailyData* out, uint8_t count);
+    int getHourly(OpenMeteoHourlyData* out, uint8_t count);
+    int getCurrent(OpenMeteoCurrentData* out);
+
+    void setTimeout(uint16_t milliseconds);
+    int lastError() const { return _lastError; }
+    const char* lastErrorMessage() const;
 
 private:
-	WiFiClientSecure* _client;
-	const char* _caCert;
-	float _latitude;
-	float _longitude;
-	char _timezone[48];
-	char _temperatureUnit[16];
-	char _windSpeedUnit[8];
-	char _precipitationUnit[8];
-	uint8_t _forecastDays;
-	uint16_t _timeout;
-	int _lastError;
-	char _transportError[96];
+    WiFiClientSecure* _client;
+    const char* _caCert;
+    float _latitude;
+    float _longitude;
+    char _timezone[48];
+    char _temperatureUnit[16];
+    char _windSpeedUnit[8];
+    char _precipitationUnit[16];
+    uint8_t _forecastDays;
+    uint16_t _timeout;
+    uint32_t _lastRequest;
+    char _lastRequestSection[12];
+    int _lastError;
+    char _transportError[96];
 
-	int request(const char* section, const char* variables, uint8_t count,
-		OpenMeteoJsonListener& listener);
-	String makeUrl(const char* section, const char* variables, uint8_t count);
-	static String encode(const char* value);
+    int request(
+        const char* section,
+        const char* variables,
+        uint8_t count,
+        OpenMeteoJsonListener& listener);
+
+    String makeUrl(
+        const char* section,
+        const char* variables,
+        uint8_t count);
+
+    static String encode(const char* value);
 };
+
 #endif
 
 
