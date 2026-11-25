@@ -10,7 +10,7 @@
 #define _open_meteoapi_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
@@ -18,7 +18,6 @@
 #include <JsonListener.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
-#include "Cert_open-meteo.h"
 
 
 class OpenMeteoJsonListener;
@@ -119,5 +118,4 @@ private:
 };
 
 #endif
-
 

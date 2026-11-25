@@ -14,12 +14,10 @@
 #include <WiFiClientSecure.h>
 #include "Cert_open-meteo.h"
 
-#include "nvs_flash.h"
-#include <wifi_connectapp.h>
-#include <WiFiProv.h>
 #include <WiFi.h>
 
-wifi_connectapp Prov;
+const char* wifiSsid = "YOUR_WIFI_SSID";
+const char* wifiPassword = "YOUR_WIFI_PASSWORD";
 WiFiClientSecure secureClient;
 open_meteoapi weather;
 
@@ -249,7 +247,7 @@ void setup() {
     Serial.begin(115200);
     waitForSerial(5000);
 
-    Prov.startWifi();
+    WiFi.begin(wifiSsid, wifiPassword);
     while (WiFi.status() != WL_CONNECTED) {
         delay(300);
         Serial.print('.');
