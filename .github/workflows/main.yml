@@ -35,8 +35,6 @@ jobs:
 
       - name: Compile basic example
         run: |
-          mkdir -p "$RUNNER_TEMP/basic"
-          cp examples/basic.ino "$RUNNER_TEMP/basic/basic.ino"
           arduino-cli compile \
             --fqbn esp32:esp32:esp32 \
-            "$RUNNER_TEMP/basic"
+            examples/basic
