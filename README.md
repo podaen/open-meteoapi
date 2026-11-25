@@ -18,13 +18,46 @@ You do not create or sign a certificate yourself. Download the public root CA ce
 3. In the folder containing your Arduino `.ino` sketch, create a file named `Cert_open-meteo.h`.
 4. Put the following declaration in that header and replace the instruction line with every base64 text line from the downloaded file:
 
-    #pragma once
+#pragma once
+#ifndef CERT_H
+#define CERT_H
 
-    static const char rootCA[] = R"PEM(
-    -----BEGIN CERTIFICATE-----
-    paste every certificate body line here
-    -----END CERTIFICATE-----
-    )PEM";
+// EXAMPLE PLACEHOLDER ONLY - not a valid certificate (same length as the real one).
+// Replace with the real PEM from https://letsencrypt.org/ca/certificates/
+// ISRG Root X1 is valid until 2035-06-04.
+
+static const char rootCA[] = R"PEM(
+-----BEGIN CERTIFICATE-----
+Q7xLm2VpZk9aTn4bAq2Ws3Ed4Rf5Tg6HCv2Bn3Mq4We5Rt6YLp0Oi9Ku8Jy7Hn6B
+wE5rYt8uIo3PsD1fy7Uj8Ik9Ol0Pp1Zxu7Io8Pa9Sd0Fg1HjGt5Vf4Cr3Dx2Sz1A
+Gh6Jk0LzXc/VbN+mCv2Bn3Mq4We5Rt6YKl2Zx3Cv4Bn5Mm+/Q7xLm2VpZk9aTn4b
+Aq2Ws3Ed4Rf5Tg6Hu7Io8Pa9Sd0Fg1HjLp0Oi9Ku8Jy7Hn6BwE5rYt8uIo3PsD1f
+y7Uj8Ik9Ol0Pp1ZxKl2Zx3Cv4Bn5Mm+/Gt5Vf4Cr3Dx2Sz1AGh6Jk0LzXc/VbN+m
+Cv2Bn3Mq4We5Rt6YLp0Oi9Ku8Jy7Hn6BQ7xLm2VpZk9aTn4bAq2Ws3Ed4Rf5Tg6H
+u7Io8Pa9Sd0Fg1HjGt5Vf4Cr3Dx2Sz1AwE5rYt8uIo3PsD1fCv2Bn3Mq4We5Rt6Y
+Kl2Zx3Cv4Bn5Mm+/Q7xLm2VpZk9aTn4bGh6Jk0LzXc/VbN+mLp0Oi9Ku8Jy7Hn6B
+Lp0Oi9Ku8Jy7Hn6BwE5rYt8uIo3PsD1fAq2Ws3Ed4Rf5Tg6Hu7Io8Pa9Sd0Fg1Hj
+Gt5Vf4Cr3Dx2Sz1AGh6Jk0LzXc/VbN+my7Uj8Ik9Ol0Pp1ZxKl2Zx3Cv4Bn5Mm+/
+Q7xLm2VpZk9aTn4bwE5rYt8uIo3PsD1fy7Uj8Ik9Ol0Pp1ZxKl2Zx3Cv4Bn5Mm+/
+wE5rYt8uIo3PsD1fGh6Jk0LzXc/VbN+mCv2Bn3Mq4We5Rt6YLp0Oi9Ku8Jy7Hn6B
+Gh6Jk0LzXc/VbN+mAq2Ws3Ed4Rf5Tg6Hu7Io8Pa9Sd0Fg1HjGt5Vf4Cr3Dx2Sz1A
+y7Uj8Ik9Ol0Pp1ZxCv2Bn3Mq4We5Rt6YQ7xLm2VpZk9aTn4bAq2Ws3Ed4Rf5Tg6H
+Cv2Bn3Mq4We5Rt6Yu7Io8Pa9Sd0Fg1HjwE5rYt8uIo3PsD1fGh6Jk0LzXc/VbN+m
+Kl2Zx3Cv4Bn5Mm+/Lp0Oi9Ku8Jy7Hn6By7Uj8Ik9Ol0Pp1ZxGt5Vf4Cr3Dx2Sz1A
+Q7xLm2VpZk9aTn4bAq2Ws3Ed4Rf5Tg6Hu7Io8Pa9Sd0Fg1HjGt5Vf4Cr3Dx2Sz1A
+Gh6Jk0LzXc/VbN+mCv2Bn3Mq4We5Rt6YKl2Zx3Cv4Bn5Mm+/Lp0Oi9Ku8Jy7Hn6B
+wE5rYt8uIo3PsD1fy7Uj8Ik9Ol0Pp1ZxCv2Bn3Mq4We5Rt6YGt5Vf4Cr3Dx2Sz1A
+Aq2Ws3Ed4Rf5Tg6HQ7xLm2VpZk9aTn4bGh6Jk0LzXc/VbN+mLp0Oi9Ku8Jy7Hn6B
+Cv2Bn3Mq4We5Rt6Yy7Uj8Ik9Ol0Pp1ZxKl2Zx3Cv4Bn5Mm+/Q7xLm2VpZk9aTn4b
+u7Io8Pa9Sd0Fg1HjLp0Oi9Ku8Jy7Hn6BAq2Ws3Ed4Rf5Tg6HwE5rYt8uIo3PsD1f
+Kl2Zx3Cv4Bn5Mm+/Gt5Vf4Cr3Dx2Sz1AGh6Jk0LzXc/VbN+mAq2Ws3Ed4Rf5Tg6H
+Lp0Oi9Ku8Jy7Hn6BQ7xLm2VpZk9aTn4by7Uj8Ik9Ol0Pp1ZxKl2Zx3Cv4Bn5Mm+=
+-----END CERTIFICATE-----
+)PEM";
+
+#endif
+
+!!! Don't use this certificate in production. It is only an example placeholder with the same length as the real certificate. !!!
 
 5. Keep the PEM boundary lines exactly as shown: five hyphens on each side of BEGIN and END, with no added spaces or punctuation. Copy the entire body without adding quotes or `\n` to the ends of lines. Do not paste OpenSSL diagnostic text such as certificate-chain headings, fingerprints, or verification messages.
 6. Include the header in the sketch with `#include "Cert_open-meteo.h"`. After Wi-Fi connects and the ESP32 clock has synchronized, configure the client:
@@ -36,7 +69,7 @@ Do not call `secureClient.setInsecure()`: it turns off certificate verification.
 
 ## Set up the forecast in Open-Meteo Docs
 
-!!! The forecast can be configured in the `open_meteoapi_config.h` file (`src/open_meteoapi_config.h`). It holds the location, timezone, forecast range, units and the requested variables. The steps below explain how to choose these values with the Open-Meteo docs.
+!!! The forecast can be configured in the `open_meteoapi_config.h` file (`src/open_meteoapi_config.h`). It holds the location, timezone, forecast range, units and the requested variables. The steps below explain how to choose these values with the Open-Meteo docs. !!!
 
 Open the [Open-Meteo Weather Forecast API docs](https://open-meteo.com/en/docs). The page is an interactive request builder: select the location and variables, then review the generated API URL and response preview.
 
