@@ -22,8 +22,8 @@ WiFiClientSecure secureClient;
 open_meteoapi weather;
 
 OpenMeteoDailyData dailyWeather{};
-constexpr uint8_t HOURLY_WEATHER_COUNT = 5;
-OpenMeteoHourlyData hourlyWeather[HOURLY_WEATHER_COUNT]{};
+constexpr uint8_t HOURLY_WEATHER_COUNT = OpenMeteoConfig::HOURLY_COUNT;
+OpenMeteoHourlyData hourlyWeather[HOURLY_WEATHER_COUNT];
 
 bool daily = true;
 bool hourly = true;
@@ -36,9 +36,89 @@ uint8_t Icon;
 
 struct tm now = {};
 static const char daysOfTheWeek[7][12] = {
-    "Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"
+    "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"
 };
 
+
+void startTime();
+const char* getDayName();
+void printDayname(const struct tm& timeInfo);
+void printTime(const struct tm& timeInfo);
+void StartWeather();
+bool GetDailyWeather();
+bool GetHourlyWeather();
+void printDaily();
+void printHourly();
+
+
+
+void waitForSerial(unsigned long timeoutMillis) {
+    const unsigned long started = millis();
+    while (!Serial && millis() - started < timeoutMillis) {
+        delay(10);
+    }
+}
+bool waitForClock(unsigned long timeoutMillis) {
+    const unsigned long started = millis();
+    time_t epoch = time(nullptr);
+
+    Serial.print("Waiting for clock");
+
+    while (epoch < 1700000000 && millis() - started < timeoutMillis) {
+        delay(500);
+        Serial.print('.');
+        epoch = time(nullptr);
+    }
+
+    Serial.println();
+
+    if (epoch < 1700000000) {
+        Serial.println("Clock synchronization timed out");
+        return false;
+    }
+
+    // Convert Unix time to local time using the timezone configured in startTime().
+    localtime_r(&epoch, &now);
+
+    Serial.printf("Unix time: %ld\n", static_cast<long>(epoch));
+    printTime(now);
+    printDayname(now);
+
+    return true;
+}
+
+void setup() {
+    Serial.begin(115200);
+    waitForSerial(5000);
+
+    WiFi.begin(wifiSsid, wifiPassword);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(300);
+        Serial.print('.');
+    }
+    Serial.println("\nWi-Fi connected");
+
+    startTime();
+
+    if (!waitForClock(15000)) {
+        Serial.println("Continuing without valid time");
+        return;
+    }
+
+    StartWeather();
+
+    if (daily) {
+        if (GetDailyWeather()) { printDaily(); }
+    }
+
+    if (hourly) {
+        if (GetHourlyWeather()); { printHourly(); }
+    }
+    Serial.println("All requests completed");
+}
+void loop() {
+    delay(1000);
+}
 
 void startTime() {
     // Central European Time with automatic daylight-saving time.
@@ -84,12 +164,9 @@ void printTime(const struct tm& timeInfo) {
 }
 
 void StartWeather() {
-    weather.begin(secureClient, 50.741f, 4.0067f, "Europe/Berlin");
+    weather.begin(secureClient);   // location, timezone from config
 
     weather.setCACert(rootCA);
-    weather.setTemperatureUnit("celsius");
-    weather.setWindSpeedUnit("kmh");
-    weather.setPrecipitationUnit("mm");
     weather.setTimeout(30000);
 
     weather.interval = WEATHER_REQUEST_INTERVAL;
@@ -206,72 +283,4 @@ void printHourly() {
             "  Weather code: %d\n",
             hourlyWeather[index].weatherCode);
     }
-}
-
-void waitForSerial(unsigned long timeoutMillis) {
-    const unsigned long started = millis();
-    while (!Serial && millis() - started < timeoutMillis) {
-        delay(10);
-    }
-}
-bool waitForClock(unsigned long timeoutMillis) {
-    const unsigned long started = millis();
-    time_t epoch = time(nullptr);
-
-    Serial.print("Waiting for clock");
-
-    while (epoch < 1700000000 && millis() - started < timeoutMillis) {
-        delay(500);
-        Serial.print('.');
-        epoch = time(nullptr);
-    }
-
-    Serial.println();
-
-    if (epoch < 1700000000) {
-        Serial.println("Clock synchronization timed out");
-        return false;
-    }
-
-    // Convert Unix time to local time using the timezone configured in startTime().
-    localtime_r(&epoch, &now);
-
-    Serial.printf("Unix time: %ld\n", static_cast<long>(epoch));
-    printTime(now);
-    printDayname(now);
-
-    return true;
-}
-
-void setup() {
-    Serial.begin(115200);
-    waitForSerial(5000);
-
-    WiFi.begin(wifiSsid, wifiPassword);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(300);
-        Serial.print('.');
-    }
-    Serial.println("\nWi-Fi connected");
-
-    startTime();
-
-    if (!waitForClock(15000)) {
-        Serial.println("Continuing without valid time");
-        return;
-    }
-
-    StartWeather();
-
-    if (daily) {
-        if (GetDailyWeather()) { printDaily(); }
-    }
-
-    if (hourly) {
-        if (GetHourlyWeather()); { printHourly(); }
-    }
-    Serial.println("All requests completed");
-}
-void loop() {
-    delay(1000);
 }

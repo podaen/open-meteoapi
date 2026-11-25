@@ -2,23 +2,25 @@
  Name:		open_meteoapi.cpp
  Created:	10/22/2026 9:29:21 PM
  Author:	Daen
- Editor:	http://www.visualmicro.com
+ Documentation: https://open-meteo.com/en/docs
 */
 
 #include "open_meteoapi.h"
+#include "open_meteoapi_config.h"
 #include <JsonListener.h>
 #include <JsonStreamingParser.h>
 
+
 namespace {
-    const char* DAILY_FIELDS =
-        "temperature_2m_min,temperature_2m_max,sunrise,sunset,rain_sum,"
-        "snowfall_sum,wind_gusts_10m_max,wind_speed_10m_max,moon_phase,"
-        "wind_direction_10m_dominant,apparent_temperature_max,"
-        "apparent_temperature_min,moonrise,weather_code";
-    const char* HOURLY_FIELDS =
-        "temperature_2m,weather_code,rain,snowfall,relative_humidity_2m";
-    const char* CURRENT_FIELDS =
-        "temperature_2m,weather_code,rain,snowfall,relative_humidity_2m";
+    //const char* DAILY_FIELDS =
+    //    "temperature_2m_min,temperature_2m_max,sunrise,sunset,rain_sum,"
+    //    "snowfall_sum,wind_gusts_10m_max,wind_speed_10m_max,moon_phase,"
+    //    "wind_direction_10m_dominant,apparent_temperature_max,"
+    //    "apparent_temperature_min,moonrise,weather_code";
+    //const char* HOURLY_FIELDS =
+    //    "temperature_2m,weather_code,rain,snowfall,relative_humidity_2m";
+    //const char* CURRENT_FIELDS =
+    //    "temperature_2m,weather_code,rain,snowfall,relative_humidity_2m";  
 
     enum ErrorCode {
         ERR_NOT_INITIALIZED = -1001,
@@ -164,19 +166,26 @@ private:
 open_meteoapi::open_meteoapi()
     : _client(nullptr),
     _caCert(nullptr),
-    _latitude(0.0f),
-    _longitude(0.0f),
-    _forecastDays(1),
+    _latitude(OpenMeteoConfig::LATITUDE),
+    _longitude(OpenMeteoConfig::LONGITUDE),
+    _forecastDays(OpenMeteoConfig::FORECAST_DAYS),
     _timeout(30000),
     _lastRequest(0),
     _lastError(0) {
     _lastRequestSection[0] = '\0';
     _transportError[0] = '\0';
 
-    strlcpy(_timezone, "auto", sizeof(_timezone));
-    strlcpy(_temperatureUnit, "celsius", sizeof(_temperatureUnit));
-    strlcpy(_windSpeedUnit, "kmh", sizeof(_windSpeedUnit));
-    strlcpy(_precipitationUnit, "mm", sizeof(_precipitationUnit));
+    strlcpy(_timezone, OpenMeteoConfig::TIMEZONE, sizeof(_timezone));
+    strlcpy(_temperatureUnit, OpenMeteoConfig::TEMPERATURE_UNIT, sizeof(_temperatureUnit));
+    strlcpy(_windSpeedUnit, OpenMeteoConfig::WIND_SPEED_UNIT, sizeof(_windSpeedUnit));
+    strlcpy(_precipitationUnit, OpenMeteoConfig::PRECIPITATION_UNIT, sizeof(_precipitationUnit));
+}
+void open_meteoapi::begin(WiFiClientSecure& client) {
+    begin(
+        client,
+        OpenMeteoConfig::LATITUDE,
+        OpenMeteoConfig::LONGITUDE,
+        OpenMeteoConfig::TIMEZONE);
 }
 
 void open_meteoapi::begin(WiFiClientSecure& client, float latitude, float longitude,const char* timezone) {
@@ -232,6 +241,24 @@ String open_meteoapi::encode(const char* value) {
     return result;
 }
 
+String makeFieldList(const OpenMeteoConfig::VariableOption* options,size_t optionCount) {
+    String fields;
+
+    for (size_t i = 0; i < optionCount; ++i) {
+        if (!options[i].enabled) {
+            continue;
+        }
+
+        if (fields.length() > 0) {
+            fields += ',';
+        }
+
+        fields += options[i].name;
+    }
+
+    return fields;
+}
+
 String open_meteoapi::makeUrl(const char* section, const char* variables, uint8_t count) {
     String url = "https://api.open-meteo.com/v1/forecast?latitude=";
     url += String(_latitude, 4);
@@ -251,11 +278,31 @@ String open_meteoapi::makeUrl(const char* section, const char* variables, uint8_
     url += _windSpeedUnit;
     url += "&precipitation_unit=";
     url += _precipitationUnit;
-    url += "&timeformat=iso8601";
+    url += "&timeformat=";
+    url += OpenMeteoConfig::TIME_FORMAT;
+    if (OpenMeteoConfig::ELEVATION[0] != '\0' &&
+        strcmp(OpenMeteoConfig::ELEVATION, "auto") != 0) {
+        url += "&elevation=";
+        url += encode(OpenMeteoConfig::ELEVATION);
+    }
+    url += "&cell_selection=";
+    url += encode(OpenMeteoConfig::CELL_SELECTION);
+
+    if (OpenMeteoConfig::MODEL[0] != '\0') {
+        url += "&models=";
+        url += encode(OpenMeteoConfig::MODEL);
+    }
+
+    if (OpenMeteoConfig::PAST_DAYS > 0) {
+        url += "&past_days=";
+        url += String(OpenMeteoConfig::PAST_DAYS);
+    }
+
     if (strcmp(section, "hourly") == 0) {
         url += "&forecast_hours=";
         url += String(count);
     }
+
     return url;
 }
 
@@ -280,6 +327,7 @@ int open_meteoapi::request(const char* section,const char* variables,uint8_t cou
     http.setTimeout(_timeout);
 
     const String url = makeUrl(section, variables, count);
+    //Serial.println(url);
 
     if (!http.begin(*_client, url)) {
         strlcpy(
@@ -353,23 +401,30 @@ int open_meteoapi::getDaily(OpenMeteoDailyData* out, uint8_t count) {
         return _lastError = ERR_BAD_ARGUMENT;
     setForecastDays(count);
     OpenMeteoJsonListener listener(KIND_DAILY, out, count);
-    return request("daily", DAILY_FIELDS, count, listener);
+    //return request("daily", DAILY_FIELDS, count, listener);
+    //return request("daily", OpenMeteoConfig::DAILY_FIELDS, count, listener);
+    String fields = makeFieldList(OpenMeteoConfig::DAILY_FIELDS,sizeof(OpenMeteoConfig::DAILY_FIELDS) / sizeof(OpenMeteoConfig::DAILY_FIELDS[0]));
+    if (fields.length() == 0) return _lastError = ERR_BAD_ARGUMENT;
+    return request("daily", fields.c_str(), count, listener);
 }
 
 int open_meteoapi::getHourly(OpenMeteoHourlyData* out, uint8_t count) {
     if (!out || count == 0 || count > OPEN_METEO_MAX_HOURLY)
         return _lastError = ERR_BAD_ARGUMENT;
     OpenMeteoJsonListener listener(KIND_HOURLY, out, count);
-    return request("hourly", HOURLY_FIELDS, count, listener);
+    //return request("hourly", HOURLY_FIELDS, count, listener);
+    //return request("hourly", OpenMeteoConfig::HOURLY_FIELDS, count, listener);
+    String fields = makeFieldList(OpenMeteoConfig::HOURLY_FIELDS,sizeof(OpenMeteoConfig::HOURLY_FIELDS) / sizeof(OpenMeteoConfig::HOURLY_FIELDS[0]));
+    if (fields.length() == 0) return _lastError = ERR_BAD_ARGUMENT;
+    return request("hourly", fields.c_str(), count, listener);
 }
 
 int open_meteoapi::getCurrent(OpenMeteoCurrentData* out) {
     if (!out) return _lastError = ERR_BAD_ARGUMENT;
     OpenMeteoJsonListener listener(KIND_CURRENT, out, 1);
-    return request("current", CURRENT_FIELDS, 1, listener);
+    //return request("current", CURRENT_FIELDS, 1, listener);
+    //return request("current", OpenMeteoConfig::CURRENT_FIELDS, 1, listener);
+    String fields = makeFieldList(OpenMeteoConfig::CURRENT_FIELDS,sizeof(OpenMeteoConfig::CURRENT_FIELDS) / sizeof(OpenMeteoConfig::CURRENT_FIELDS[0]));
+    if (fields.length() == 0) return _lastError = ERR_BAD_ARGUMENT;
+    return request("current", fields.c_str(), 1, listener);
 }
-
-
-
-
-

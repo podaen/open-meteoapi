@@ -2,7 +2,7 @@
  Name:		open_meteoapi.h
  Created:	10/22/2026 9:29:21 PM
  Author:	Daen
- Editor:	http://www.visualmicro.com
+ Documentation: https://open-meteo.com/en/docs
 */
 //
 #pragma once
@@ -15,10 +15,11 @@
 	#include "WProgram.h"
 #endif
 
+
 #include <JsonListener.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
-
+#include "open_meteoapi_config.h"
 
 class OpenMeteoJsonListener;
 
@@ -67,11 +68,13 @@ public:
 
     uint32_t interval = 0;
 
+    void begin(WiFiClientSecure& client);
+
     void begin(
         WiFiClientSecure& client,
         float latitude,
         float longitude,
-        const char* timezone = "auto");
+        const char* timezone = OpenMeteoConfig::TIMEZONE);
 
     void setCACert(const char* rootCA);
     void setTemperatureUnit(const char* unit);
