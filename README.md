@@ -36,6 +36,8 @@ Do not call `secureClient.setInsecure()`: it turns off certificate verification.
 
 ## Set up the forecast in Open-Meteo Docs
 
+!!! The forecast can be configured in the `open_meteoapi_config.h` file (`src/open_meteoapi_config.h`). It holds the location, timezone, forecast range, units and the requested variables. The steps below explain how to choose these values with the Open-Meteo docs.
+
 Open the [Open-Meteo Weather Forecast API docs](https://open-meteo.com/en/docs). The page is an interactive request builder: select the location and variables, then review the generated API URL and response preview.
 
 1. **Set the location.** Enter decimal latitude and longitude. The example uses latitude `50.741` and longitude `4.0067`. For locations west of Greenwich, longitude is negative.
