@@ -7,6 +7,8 @@
 3. Include `<open_meteoapi.h>` in your sketch.
 4. For HTTPS certificate verification, create the certificate header described below, call `weather.setCACert(rootCA)`, and synchronize the ESP32 clock after Wi-Fi connects.
 
+To run `examples/basic`, set `wifiSsid` and `wifiPassword` in the sketch to your Wi-Fi credentials and create `Cert_open-meteo.h` alongside it as described below.
+
 ## Prepare the PEM root certificate
 
 You do not create or sign a certificate yourself. Download the public root CA certificate that the server's certificate chain connects to. For the chain used by this example, use the official **ISRG Root X1 self-signed PEM** from [Let's Encrypt's certificate page](https://letsencrypt.org/ca/certificates/).

@@ -35,6 +35,10 @@ jobs:
 
       - name: Compile basic example
         run: |
+          mkdir -p "$RUNNER_TEMP/basic"
+          cp examples/basic/basic.ino "$RUNNER_TEMP/basic/"
+          # Compile-only placeholder; real sketches must supply a trusted CA.
+          echo 'static const char rootCA[] = "";' > "$RUNNER_TEMP/basic/Cert_open-meteo.h"
           arduino-cli compile \
             --fqbn esp32:esp32:esp32 \
-            examples/basic
+            "$RUNNER_TEMP/basic"
