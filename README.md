@@ -2,7 +2,7 @@
 
 ## How to install
 
-1. Install the `JsonStreamingParser` dependency using the Arduino IDE Library Manager, or download and install it as a ZIP library.
+1. Install the `JsonStreamingParser` dependency from https://github.com/podaen/json-streaming-parser, download and install it as a ZIP library.
 2. Install this library by selecting **Sketch → Include Library → Add .ZIP Library…** and choosing the Open-Meteo library ZIP.
 3. Include `<open_meteoapi.h>` in your sketch.
 4. For HTTPS certificate verification, create the certificate header described below, call `weather.setCACert(rootCA)`, and synchronize the ESP32 clock after Wi-Fi connects.
