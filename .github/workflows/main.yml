@@ -13,30 +13,30 @@ jobs:
 
       - uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 platform and library dependency
+      - name: Install ESP32 platform
         run: |
           arduino-cli config init
           arduino-cli config add board_manager.additional_urls \
             https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
-          arduino-cli lib update-index
-          arduino-cli lib install JsonStreamingParser
+
+      - name: Install JSON parser dependency
+        run: |
+          mkdir -p "$HOME/Arduino/libraries"
+          git clone --depth 1 \
+            https://github.com/podaen/json-streaming-parser.git \
+            "$HOME/Arduino/libraries/JsonStreamingParser"
 
       - name: Install this library
         run: |
           mkdir -p "$HOME/Arduino/libraries/OpenMeteo"
           cp -R "$GITHUB_WORKSPACE"/. "$HOME/Arduino/libraries/OpenMeteo"/
 
-      - name: Compile smoke sketch
+      - name: Compile basic example
         run: |
-          mkdir -p "$RUNNER_TEMP/SmokeTest"
-          cat > "$RUNNER_TEMP/SmokeTest/SmokeTest.ino" <<'EOF'
-          #include <open_meteoapi.h>
-
-          void setup() {}
-          void loop() {}
-          EOF
+          mkdir -p "$RUNNER_TEMP/basic"
+          cp examples/basic.ino "$RUNNER_TEMP/basic/basic.ino"
           arduino-cli compile \
             --fqbn esp32:esp32:esp32 \
-            "$RUNNER_TEMP/SmokeTest"
+            "$RUNNER_TEMP/basic"
