@@ -1,0 +1,42 @@
+name: ESP32 CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Install ESP32 platform and library dependency
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls \
+            https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+          arduino-cli lib update-index
+          arduino-cli lib install JsonStreamingParser
+
+      - name: Install this library
+        run: |
+          mkdir -p "$HOME/Arduino/libraries/OpenMeteo"
+          cp -R "$GITHUB_WORKSPACE"/. "$HOME/Arduino/libraries/OpenMeteo"/
+
+      - name: Compile smoke sketch
+        run: |
+          mkdir -p "$RUNNER_TEMP/SmokeTest"
+          cat > "$RUNNER_TEMP/SmokeTest/SmokeTest.ino" <<'EOF'
+          #include <open_meteoapi.h>
+
+          void setup() {}
+          void loop() {}
+          EOF
+          arduino-cli compile \
+            --fqbn esp32:esp32:esp32 \
+            "$RUNNER_TEMP/SmokeTest"
